@@ -29,8 +29,11 @@ data/women_top/*
 data/pose/*
 data/segment/*
 prepare_data/tfrecord/*
-model/*
 results/*
+*.caffemodel
+*.data-00000-of-00001
+*.index
+*.meta
 
 # Logs and databases #
 ######################
