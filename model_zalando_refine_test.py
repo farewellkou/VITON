@@ -39,7 +39,7 @@ FLAGS = tf.app.flags.FLAGS
 tf.flags.DEFINE_string("image_dir", "data/women_top/",
                        "Directory containing product and person images.")
 tf.flags.DEFINE_string("test_label",
-                       "data/viton_test_pairs.txt",
+                       "data/test_image_list.txt",
                        "File containing labels for testing.")
 tf.flags.DEFINE_string("result_dir", "results/stage2/",
                        "Folder containing the results of testing.")
@@ -151,7 +151,11 @@ def main(unused_argv):
 
     # reading input data
     test_info = open(FLAGS.test_label).read().splitlines()
-    for i in range(FLAGS.begin, FLAGS.end, batch_size):
+    end_num = 0
+    with open("./data/test_image_list.txt") as f:
+      image_list = [s.strip() for s in f.readlines()]
+      end_num = len(image_list)
+    for i in range(FLAGS.begin, end_num, batch_size):
       # loading batch data
       print(i)
       images = np.zeros((batch_size,256,192,3))
@@ -225,22 +229,24 @@ def main(unused_argv):
       else:
         index = open(index_path, "w")
         index.write("<html><body><table><tr>")
-        index.write("<th>step</th>")
-        index.write("<th>name</th><th>input</th>"
-          "<th>output</th><th>target</th></tr>")
+        index.write("<th>No.</th>")
+        index.write("<th>File</th><th>human image</th>"
+          "<th>product image</th><th>stage1 output</th>"
+          "<th>stage1 mask</th><th>Warped product</th>"
+          "<th>stage2 output</th><th>stage2 mask</th></tr>")
       for j in range(batch_size):
         index.write("<tr>")
-        index.write("<td>%d %d</td>" % (step, i + j))
+        index.write("<td>%d</td>" % (i + j))
         index.write("<td>%s %s</td>" % (image_names[j],
                                           product_image_names[j]))
         index.write("<td><img src='images/%s'></td>" % image_names[j])
         index.write("<td><img src='images/%s'></td>" % product_image_names[j])
         index.write("<td><img src='images/%s'></td>" % 
-           (image_names[j] + "_" + product_image_names[j] + '_tps.png'))
-        index.write("<td><img src='images/%s'></td>" % 
           (image_names[j] + "_" + product_image_names[j] + '_coarse.png'))
         index.write("<td><img src='images/%s'></td>" % 
            (image_names[j] + "_" + product_image_names[j] + '_mask.png'))
+        index.write("<td><img src='images/%s'></td>" % 
+           (image_names[j] + "_" + product_image_names[j] + '_tps.png'))
         index.write("<td><img src='images/%s'></td>" % 
            (image_names[j] + "_" + product_image_names[j] + '_final.png'))
         index.write("<td><img src='images/%s'></td>" % 

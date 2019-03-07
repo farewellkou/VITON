@@ -4,10 +4,11 @@ function [keypoints1, keypoints2, control_points, warp_im] = tps_main(V1, V2, n_
 %%%
 %%%Define flags and parameters:
 %%%
-% display_flag=1;
+%display_flag=1;
 affine_start_flag=1;
 polarity_flag=1;
-nsamp=100;
+%nsamp=100;
+nsamp=5;
 eps_dum=0.25;
 ndum_frac=0.25;        
 mean_dist_global=[];
@@ -42,6 +43,9 @@ end
 %%% edge detection
 %%%
 [x2,y2,t2]=bdry_extract_3(V2);
+%disp(x2);
+%disp(y2);
+%disp(t2);
 nsamp2=length(x2);
 if nsamp2>=nsamp
    [x2,y2,t2]=get_samples_1(x2,y2,t2,nsamp);
@@ -55,6 +59,7 @@ Y=[x2 y2];
 [x1,y1,t1]=bdry_extract_3(V1);
 
 nsamp1=length(x1);
+disp(nsamp1)
 if nsamp1>=nsamp
    [x1,y1,t1]=get_samples_1(x1,y1,t1,nsamp);
 else
@@ -77,7 +82,8 @@ if display_flag
    hold off
    axis('ij');axis([1 N2 1 N1])
    title([int2str(length(x2)) ' samples'])
-   drawnow	
+   drawnow
+   %saveas(gcf,'test','png');	
 end
 
 %if display_flag
