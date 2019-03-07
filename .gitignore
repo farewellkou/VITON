@@ -28,6 +28,7 @@
 data/women_top/*
 data/pose/*
 data/segment/*
+data/tps/*
 prepare_data/tfrecord/*
 results/*
 *.caffemodel
