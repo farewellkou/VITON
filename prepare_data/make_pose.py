@@ -6,7 +6,7 @@ import math
 import time
 import sys
 
-% change to path of your caffe python
+# change to path of your caffe python
 sys.path.append("/home/kouta/caffe_ssl/python")
 
 import caffe
