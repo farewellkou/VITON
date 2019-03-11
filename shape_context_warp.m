@@ -20,9 +20,10 @@ image_list = fullfile('./data/', 'test_image_list.txt');
 fileID = fopen(image_list, 'r');
 images = textscan(fileID, '%s %s');
 human_images = string(cell2mat(images{1}))
+product_images = string(cell2mat(images{2}))
 sz = size(human_images, 1)
 
-[image1, image2] = textread('data/test_image_list.txt', '%s %s\n');
+% [image1, image2] = textread('data/test_image_list.txt', '%s %s\n');
 % using a smaller height and width for the shape context matching
 % can save time without hurting the perform too much.
 h = 256/4;
@@ -30,13 +31,13 @@ w = 192/4;
 % we use 10x10 control_points
 n_control = 10;
 for i = 1:sz %length(image1) % only run over 1 image (for now)
-    image_name1 = image1{i};
-    image_name2 = image2{i};
-    if exist([MASK_DIR, image_name1, '_', image_name2, '_tps.mat'])
-        continue
-    end
-    V1 = imread([DATA_ROOT, image_name2]);
+    image_name1 = human_images{i};
+    image_name2 = product_images{i};
+    %if exist([MASK_DIR, image_name1, '_', image_name2, '_tps.mat'])
+    %    continue
+    %end
     disp([DATA_ROOT, image_name2])
+    V1 = imread([DATA_ROOT, image_name2]);
     [h0, w0, ~] = size(V1);
     orig_im = imresize(im2double(V1), [h,w]);
     % extract fashion item masks
@@ -45,8 +46,8 @@ for i = 1:sz %length(image1) % only run over 1 image (for now)
     V1 = imfill(V1);
     V1 = medfilt2(V1);
     % Load product mask of image.
-    V2 = load([MASK_DIR, image_name1, '_', image_name2, '_mask.mat']);
     disp([MASK_DIR, image_name1, '_', image_name2, '_mask.mat'])
+    V2 = load([MASK_DIR, image_name1, '_', image_name2, '_mask.mat']);
     V2 = imresize(double(V2.mask), [h,w]);
     % TPS transformation
     try

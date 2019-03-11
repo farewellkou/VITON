@@ -26,6 +26,7 @@ import collections
 from model_zalando_tps_warp import create_refine_generator
 import os
 import time
+import shutil
 from tps_transformer import tps_stn
 
 import numpy as np
@@ -157,7 +158,7 @@ def main(unused_argv):
       end_num = len(image_list)
     for i in range(FLAGS.begin, end_num, batch_size):
       # loading batch data
-      print(i)
+      # print(i)
       images = np.zeros((batch_size,256,192,3))
       prod_images = np.zeros((batch_size,256,192,3))
       coarse_images = np.zeros((batch_size,256,192,3))
@@ -166,6 +167,7 @@ def main(unused_argv):
 
       image_names = []
       product_image_names = []
+      success_flag = []
 
       for j in range(i, i + batch_size):
         info = test_info[j].split()
@@ -173,12 +175,28 @@ def main(unused_argv):
         image_name = info[0]
         product_image_name = info[1]
         image_names.append(image_name)
+        # print(j, i + batch_size)
         product_image_names.append(product_image_name)
         try:
           (image, prod_image, coarse_image,
            tps_image, mask_output, tps_mask) = _process_image(image_name,
                                                    product_image_name, sess)
+          success_flag.append(1)
         except:
+          print("Cannot process_image. {}".format(image_name))
+          print(FLAGS.result_dir + "images/" + image_names[j-i])
+          shutil.copyfile(FLAGS.image_dir + image_names[j-i], FLAGS.result_dir + "images/" + image_names[j-i])
+          img = Image.open(FLAGS.result_dir + "images/" + image_names[j-i]).resize((192, 256))
+          img.save(FLAGS.result_dir + "images/" + image_names[j-i]) 
+          shutil.copyfile(FLAGS.image_dir + product_image_names[j-i], FLAGS.result_dir + "images/" + product_image_names[j-i])
+          img = Image.open(FLAGS.result_dir + "images/" + product_image_names[j-i]).resize((192, 256))
+          img.save(FLAGS.result_dir + "images/" + product_image_names[j-i]) 
+          shutil.copyfile("./results/stage1/images/00015000_" + image_names[j-i] + "_" + product_image_names[j-i] + ".png", 
+                          FLAGS.result_dir + "images/" + image_names[j-i] + "_" + product_image_names[j-i] + '_coarse.png')
+          shutil.copyfile("./results/stage1/images/00015000_" + image_names[j-i] + "_" + product_image_names[j-i] + "_mask.png", 
+                          FLAGS.result_dir + "images/" + image_names[j-i] + "_" + product_image_names[j-i] + '_mask.png')
+
+          success_flag.append(0)
           continue
 
         images[j-i] = image
@@ -202,25 +220,26 @@ def main(unused_argv):
       # write results
       for j in range(batch_size):
         step = 0
-        scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
-                          "_" + product_image_names[j] + '_tps.png',
-                          (tps_images[j] / 2.0 + 0.5))
-        scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
-                          "_" + product_image_names[j] + '_coarse.png',
-                          (coarse_images[j] / 2.0 + 0.5))
-        scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
-                          "_" + product_image_names[j] + '_mask.png',
-                          np.squeeze(mask_outputs[j]))
-        scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
-                          "_" + product_image_names[j] + '_final.png',
-                          (image_output[j]) / 2.0 + 0.5)
-        scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
-                          "_" + product_image_names[j] + '_sel_mask.png',
-                          np.squeeze(sel_mask[j]))
-        scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j],
-                          (images[j] / 2.0 + 0.5))
-        scipy.misc.imsave(FLAGS.result_dir + "images/"+ product_image_names[j],
-                          (prod_images[j] / 2.0 + 0.5))
+        if success_flag[j] == 1:
+          scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
+                            "_" + product_image_names[j] + '_tps.png',
+                            (tps_images[j] / 2.0 + 0.5))
+          scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
+                            "_" + product_image_names[j] + '_coarse.png',
+                            (coarse_images[j] / 2.0 + 0.5))
+          scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
+                            "_" + product_image_names[j] + '_mask.png',
+                            np.squeeze(mask_outputs[j]))
+          scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
+                            "_" + product_image_names[j] + '_final.png',
+                            (image_output[j]) / 2.0 + 0.5)
+          scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j] +
+                            "_" + product_image_names[j] + '_sel_mask.png',
+                            np.squeeze(sel_mask[j]))
+          scipy.misc.imsave(FLAGS.result_dir + "images/" + image_names[j],
+                            (images[j] / 2.0 + 0.5))
+          scipy.misc.imsave(FLAGS.result_dir + "images/"+ product_image_names[j],
+                            (prod_images[j] / 2.0 + 0.5))
 
       # write html
       index_path = os.path.join(FLAGS.result_dir, "index.html")

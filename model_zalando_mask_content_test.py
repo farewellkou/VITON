@@ -66,8 +66,8 @@ def _process_image(image_name, product_image_name, sess,
   segment_raw = process_segment_map(segment_raw, image.shape[0], image.shape[1])
   with open('./data/pose/' + image_name[:-4] + ".mat", mode='rb') as f:
     pose_raw = pickle.load(f)
-  print("Reading pose: ", './data/pose/' + image_name[:-4] + ".mat")
-  print(pose_raw.keys())
+  print("Reading pose: ./data/pose/{}.mat".format(image_name[:-4]))
+  # print(pose_raw.keys())
   pose_raw = extract_pose_keypoints(pose_raw)
   pose_raw = extract_pose_map(pose_raw, image.shape[0], image.shape[1])
   pose_raw = np.asarray(pose_raw, np.float32)

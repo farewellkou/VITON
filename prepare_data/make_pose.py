@@ -210,7 +210,7 @@ if __name__ == "__main__":
         image_list = [s.strip() for s in f.readlines()]
         for image_name in image_list:
             human_image = image_name.split()[0]
-            print("Generating pose: ", human_image)
+            print("Generating pose: {}".format(human_image))
             file_prefix = human_image[:-4]
             with open('../data/pose/' + file_prefix + ".mat", mode='wb') as f:
                 subset, candidate = generate_points("../data/women_top/" + human_image) 
