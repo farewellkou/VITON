@@ -9,20 +9,52 @@ The person representation used in this paper are extracted by a 2D pose estimato
 ### Dataset
 The dataset is no longer publicly available due to copyright issues. For thoese who have already downloaded the dataset, please note that using or distributing it is illegal!
 
-### Test
+### Test (I tested in CPU mode.)
 
-#### First stage
-Download pretrained models on [Google Drive](https://drive.google.com/drive/folders/1qFU4KmvnEr4CwEFXQZS_6Ebw5dPJAE21?usp=sharing). Put them under ```model/``` folder.
+1. Download person representation extraction model and VITON pretrtained model.
+    ```
+    $ cd model
+    $ ./get_model.sh
+    ```
+1. Set your human and product image at ```data/women_top``` and add a pair of images ```data/test_image_list.txt```.
+    ```
+    # Sample(human_image product image)
+    000000_0.jpg 000000_1.jpg
+    000001_0.jpg 000001_1.jpg
+    000002_0.jpg 000002_1.jpg
+    ```
+1. Change the environment information in the code.
+    ```
+    1. prepare_data/make_pose.py line:10
+       sys.path.append("/home/kouta/caffe_ssl/python")  # your pycaffe path
+    2. prepare_data/make_segmatation.m line:10
+       caffepath = '/home/kouta/caffe_ssl/matlab'; # your matlab path
+    ```
 
-Run ```test_stage1.sh``` to do the inference.
-The results are in ```results/stage1/images/```. ```results/stage1/index.html``` visualizes the results.
+1. Run pre-processing model.
+    ```
+    $ cd prepare_data
+    $ matlab -nodesktop -nosplash -r 'make_segmatation; exit'
+    $ python make_pose.py
+    ```
+    
+1. Run first stage script.
+    ```
+    @ project root dir
+    $ ./test_stage1.sh
+    ```
 
-#### Second stage
+1. Run shape context warp script.
+    ```
+    @ project root dir
+    $ matlab -nodesktop -nosplash -r 'shape_context_warp; exit'
+    ```
 
-Run the matlab script ```shape_context_warp.m``` to extract the TPS transformation control points.
-
-Then ```test_stage2.sh``` will do the refinement and generate the final results, which locates in ```results/stage2/images/```. ```results/stage2/index.html``` visualizes the results.
-
+1. Run second stage script. You can get result at ```result/stage2```.
+    ```
+    @ project root dir
+    $ ./test_stage2.sh
+    ```
 
 ### Train
 
